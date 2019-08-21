@@ -18,4 +18,3 @@ function signMsgAndCreateSubdomain(message, from) {
     });
   });
 }
-

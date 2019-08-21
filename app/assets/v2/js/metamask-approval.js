@@ -4,6 +4,7 @@ var is_metamask_unlocked = is_metamask_unlocked || false;
 
 async function metamaskApproval() {
   if (window.ethereum && window.ethereum._metamask) {
+
     window.web3 = new Web3(ethereum);
     is_metamask_approved = await window.ethereum._metamask.isApproved();
     is_metamask_unlocked = await window.ethereum._metamask.isUnlocked();
@@ -46,12 +47,27 @@ async function approve_metamask() {
   }
 }
 
+async function approve_fortmatic() {
+  try {
+    $('.btn-fortmatic').text('Loading');
+    $('.btn-fortmatic').addClass('btn-fortmatic--loading');
+    var fm = new Fortmatic('pk_test_53020F639050318F');
+    var provider = await fm.getProvider();
+
+    window.web3 = new Web3(provider);
+
+    // web3.currentProvider.enable();
+  } catch (error) {
+    _alert('Permission to connect to fortmatic rejected. Allow gitcoin to connect to fortmatic.', 'warning');
+  }
+}
+
 function ask_metamask_connection() {
   var page_url = $(location).attr('pathname');
 
   shown_on = [ '/tip/send/2', '/kudos/send', '/ens' ];
   var len = page_url.length - 1;
-  
+
   if (page_url.lastIndexOf('/') === len) {
     page_url = page_url.substring(0, len);
   }
