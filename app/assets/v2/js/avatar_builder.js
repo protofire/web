@@ -392,7 +392,7 @@ function randomAvatar(sections, optionalSections) {
             htmlComponent = $(`#avatar-option-${componentName}-${part}`)[0];
             setOptionHelper(componentName, JSON.stringify(option), htmlComponent);
           });
-          
+
           break;
         default:
           htmlComponent = $(`#avatar-option-${componentName}-${option}`)[0];
@@ -401,7 +401,7 @@ function randomAvatar(sections, optionalSections) {
       }
     }
   });
-  
+
 }
 
 function saveAvatar() {

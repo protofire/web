@@ -144,8 +144,7 @@ $(document).ready(function() {
           gasPrice: web3.toHex(5 * Math.pow(10, 9)),
           gas: web3.toHex(318730),
           gasLimit: web3.toHex(318730)
-        },
-        function(error, result) {
+        }, function(error, result) {
           indicateMetamaskPopup(true);
           if (error) {
             _alert({ message: gettext('Unable to upgrade to featured bounty. Please try again.') }, 'error');

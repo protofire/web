@@ -688,7 +688,7 @@ var currentNetwork = function(network) {
       $('#navbar-network-banner').removeClass('network-banner--warning');
       $('#navbar-network-banner').addClass('hidden');
     } else {
-      if (!network) {
+      if (!network || network !== 'not-provider') {
         info = gettext('Web3 disabled. Please install ') +
           '<a href="https://metamask.io/?utm_source=gitcoin.co&utm_medium=referral" target="_blank" rel="noopener noreferrer">Metamask</a>';
         $('#current-network').text(gettext('Metamask Not Enabled'));
@@ -879,17 +879,6 @@ var trigger_faucet_form_web3_hooks = function() {
       $('#faucet_form').addClass('hidden');
       return;
     }
-    web3.eth.getBalance(web3.eth.coinbase, function(errors, result) {
-      if (errors) {
-        return;
-      }
-      var balance = result.toNumber();
-
-      if (balance == 0) {
-        $('#zero_balance_error').css('display', 'block');
-        $('#admin_faucet_form').remove();
-      }
-    });
   }
 };
 
@@ -912,28 +901,41 @@ function getNetwork(id) {
 
 // figure out what version of web3 this is, whether we're logged in, etc..
 var listen_for_web3_changes = async function() {
-
   if (document.location.pathname.indexOf('grants') === -1) {
     if (!document.listen_for_web3_iterations) {
       document.listen_for_web3_iterations = 1;
     } else {
       document.listen_for_web3_iterations += 1;
     }
-
+    if (window.getProvider) {
+      currentNetwork('not-provider');
+      is_metamask_unlocked = true;
+      trigger_form_hooks();
+      return;
+    }
     if (typeof web3 == 'undefined') {
       currentNetwork();
       trigger_form_hooks();
-    } else if (typeof web3 == 'undefined' || typeof web3.eth == 'undefined' || typeof web3.eth.coinbase == 'undefined' || !web3.eth.coinbase) {
+    } else if (typeof web3 == 'undefined' || typeof web3.eth == 'undefined' || typeof web3.eth.coinbase == 'undefined') {
       currentNetwork('locked');
       trigger_form_hooks();
-    } else {
+    } else if (!web3.eth.coinbase) {
+      currentNetwork('not-provider');
       is_metamask_unlocked = true;
+      trigger_form_hooks();
+    } else if (localStorage.getItem('setProvider')) {
+      // window.setProvider = false;
+      localStorage.setItem('setProvider', false);
       web3.eth.getBalance(web3.eth.coinbase, function(errors, result) {
         if (errors) {
           return;
         }
         if (typeof result != 'undefined' && result !== null) {
           document.balance = result.toNumber();
+          if (document.balance == 0) {
+            $('#zero_balance_error').css('display', 'block');
+            $('#admin_faucet_form').remove();
+          }
         }
       });
 
@@ -947,23 +949,7 @@ var listen_for_web3_changes = async function() {
           trigger_form_hooks();
         }
       });
-    }
-  }
-
-  if (window.ethereum && !document.has_checked_for_ethereum_enable && window.ethereum._metamask) {
-    document.has_checked_for_ethereum_enable = true;
-    is_metamask_approved = await window.ethereum._metamask.isApproved();
-    is_metamask_unlocked = await window.ethereum._metamask.isUnlocked();
-    if (is_metamask_approved && is_metamask_unlocked) {
-      var start_time = ((new Date()).getTime() / 1000);
-
-      await ethereum.enable();
-      var now_time = ((new Date()).getTime() / 1000);
-      var did_request_and_user_respond = (now_time - start_time) > 1.0;
-
-      if (did_request_and_user_respond) {
-        document.location.reload();
-      }
+      clearInterval(window.web3_changes_id);
     }
   }
 };
@@ -997,7 +983,7 @@ var actions_page_warn_if_not_on_same_network = function() {
 attach_change_element_type();
 
 window.addEventListener('load', function() {
-  setInterval(listen_for_web3_changes, 1000);
+  window.web3_changes_id = setInterval(listen_for_web3_changes, 1000);
 });
 
 var setUsdAmount = function(event) {

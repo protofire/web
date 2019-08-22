@@ -2,62 +2,43 @@
 var is_metamask_approved = is_metamask_approved || false;
 var is_metamask_unlocked = is_metamask_unlocked || false;
 
-async function metamaskApproval() {
+
+async function approve_metamask() {
   if (window.ethereum && window.ethereum._metamask) {
-
+    window.getProvider = true;
     window.web3 = new Web3(ethereum);
-    is_metamask_approved = await window.ethereum._metamask.isApproved();
-    is_metamask_unlocked = await window.ethereum._metamask.isUnlocked();
-
     try {
-      if (is_metamask_unlocked && is_metamask_approved) {
-        var start_time = ((new Date()).getTime() / 1000);
 
-        await ethereum.enable();
-        var now_time = ((new Date()).getTime() / 1000);
-        var did_request_and_user_respond = (now_time - start_time) > 1.0;
+      await ethereum.enable();
+      localStorage.setItem('setProvider', true);
+      // window.setProvider = true;
+      window.getProvider = false;
+      is_metamask_approved = true;
 
-        if (did_request_and_user_respond) {
-          document.location.reload();
-        }
-      }
     } catch (error) {
       _alert('Permission to connect to metamask rejected. Allow gitcoin to connect to metamask.', 'warning');
     }
   }
   ask_metamask_connection();
-}
 
-window.addEventListener('load', metamaskApproval);
-
-async function approve_metamask() {
-  try {
-    var start_time = ((new Date()).getTime() / 1000);
-
-    await ethereum.enable();
-    var now_time = ((new Date()).getTime() / 1000);
-    var did_request_and_user_respond = (now_time - start_time) > 1.0;
-
-    if (did_request_and_user_respond) {
-      document.location.reload();
-    }
-    is_metamask_approved = true;
-  } catch (error) {
-    _alert('Permission to connect to metamask rejected. Allow gitcoin to connect to metamask.', 'warning');
-  }
 }
 
 async function approve_fortmatic() {
   try {
+    window.getProvider = true;
     $('.btn-fortmatic').text('Loading');
     $('.btn-fortmatic').addClass('btn-fortmatic--loading');
     var fm = new Fortmatic('pk_test_53020F639050318F');
-    var provider = await fm.getProvider();
 
-    window.web3 = new Web3(provider);
+    window.web3 = new Web3(fm.getProvider());
+    await web3.currentProvider.enable();
+    // window.setProvider = true;
+    localStorage.setItem('setProvider', true);
 
-    // web3.currentProvider.enable();
+    window.getProvider = false;
+    is_metamask_approved = true;
   } catch (error) {
+    console.log(error);
     _alert('Permission to connect to fortmatic rejected. Allow gitcoin to connect to fortmatic.', 'warning');
   }
 }

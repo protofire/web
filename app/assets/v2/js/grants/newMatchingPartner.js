@@ -57,17 +57,14 @@ function processPayment() {
     };
 
     indicateMetamaskPopup();
-    web3.eth.sendTransaction(
-      transactionParams,
-      function(error, hash) {
-        if (error) {
-          _alert(error.message, 'error');
-        } else {
-          indicateMetamaskPopup(true);
-          _alert('Please wait for this tx to confirm.', 'info');
-          saveTransactionDetails(hash);
-        }
+    web3.eth.sendTransaction(transactionParams, function(error, hash) {
+      if (error) {
+        _alert(error.message, 'error');
+      } else {
+        indicateMetamaskPopup(true);
+        _alert('Please wait for this tx to confirm.', 'info');
+        saveTransactionDetails(hash);
       }
-    );
+    });
   }
 }

@@ -779,7 +779,8 @@ $('#submitBounty').validate({
               if (error) {
                 _alert({ message: gettext('Unable to pay bounty fee. Please try again.') }, 'error');
               } else {
-                deductBountyAmount(fee, txnId);
+                if (window.web3.currentProvider.isMetaMask || txnId)
+                  deductBountyAmount(fee, txnId);
               }
             });
           } else {
@@ -806,6 +807,7 @@ $('#submitBounty').validate({
       ipfsBounty.payload.issuer.address = account;
       ipfsBounty.payload.fee_tx_id = txnId;
       ipfsBounty.payload.fee_amount = fee;
+      console.log(ipfsBounty, 'bounty');
       ipfs.addJson(ipfsBounty, newIpfsCallback);
       if (typeof ga != 'undefined') {
         if (fee == 0)
@@ -856,8 +858,7 @@ $('#submitBounty').validate({
         gasPrice: web3.toHex($('#gasPrice').val() * Math.pow(10, 9)),
         gas: web3.toHex(318730),
         gasLimit: web3.toHex(318730)
-      },
-      function(error, result) {
+      }, function(error, result) {
         indicateMetamaskPopup(true);
         if (error) {
           _alert({ message: gettext('Unable to upgrade to featured bounty. Please try again.') }, 'error');
