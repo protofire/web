@@ -481,11 +481,18 @@ const isAvailableIfReserved = function(bounty) {
 };
 
 const isBountyOwner = result => {
-  if (typeof web3 == 'undefined' || !web3.eth ||
-      typeof web3.eth.coinbase == 'undefined' || !web3.eth.coinbase || !result) {
-    return false;
+  const fortmatic = localStorage.getItem('fortmatic');
+
+  if (!fortmatic) {
+    if (typeof web3 == 'undefined' || !web3.eth ||
+    typeof web3.eth.coinbase == 'undefined' || !web3.eth.coinbase || !result || !fortmatic) {
+      return false;
+    }
   }
-  return caseInsensitiveCompare(web3.eth.coinbase, result['bounty_owner_address']);
+
+  const owner_address = fortmatic || web3.eth.coinbase;
+
+  return caseInsensitiveCompare(owner_address, result['bounty_owner_address']);
 };
 
 const isBountyOwnerPerLogin = result => {
@@ -518,7 +525,7 @@ var showWarningMessage = function(txid) {
   $('.interior .body').addClass('open');
   $('.interior .body').addClass('loading');
 
-  if (typeof txid != 'undefined' && txid.indexOf('0x') != -1) {
+  if (typeof txid != 'undefined' && txid && txid.indexOf('0x') != -1) {
     waitforWeb3(function() {
       clearInterval(interval);
       var link_url = get_etherscan_url(txid);
@@ -537,7 +544,9 @@ var showWarningMessage = function(txid) {
 // refresh page if metamask changes
 waitforWeb3(function() {
   setInterval(function() {
-    if (document.web3Changed) {
+    var fortmatic = localStorage.getItem('fortmatic');
+
+    if (document.web3Changed || fortmatic) {
       return;
     }
 
@@ -576,6 +585,7 @@ var wait_for_tx_to_mine_and_then_ping_server = function() {
           txid: txid,
           network: document.web3network
         };
+
         var error = function(response) {
           // refresh upon error
           document.location.reload();
@@ -936,7 +946,7 @@ var build_detail_page = function(result) {
     $('#funder_notif_info').append('\
         <span class="bounty-notification ml-2">\
         <i class="far fa-bell"></i>\
-        Ready to Pay? Set Your Metamask to this address!\
+        Ready to Pay? Set Your wallet to this address!\
         <img src="' + static_url + 'v2/images/metamask.svg">\
       </span>'
     );
@@ -1450,7 +1460,6 @@ var pull_bounty_from_api = function() {
       $('.nonefound').css('display', 'block');
     }
   }).fail(function(result) {
-    console.log(result);
     _alert({ message: gettext('got an error. please try again, or contact support@gitcoin.co') }, 'error');
     $('#primary_view').css('display', 'none');
   }).always(function() {

@@ -632,7 +632,6 @@ $('#submitBounty').validate({
     localStorage['githubUsername'] = githubUsername;
     localStorage['tokenAddress'] = tokenAddress;
     localStorage.removeItem('bountyId');
-
     // setup web3
     // TODO: web3 is using the web3.js file.  In the future we will move
     // to the node.js package.  github.com/ethereum/web3.js
@@ -675,9 +674,9 @@ $('#submitBounty').validate({
 
       issuePackage['timestamp'] = timestamp();
       localStorage[issueURL] = JSON.stringify(issuePackage);
-
       _alert({ message: gettext('Submission sent to web3.') }, 'info');
       setTimeout(() => {
+        window.isWeb3Fired = false;
         delete localStorage['issueURL'];
         document.location.href = '/funding/details/?url=' + issueURL;
       }, 1000);
@@ -769,6 +768,7 @@ $('#submitBounty').validate({
           deductBountyAmount(fee, '');
         } else {
           if (isETH) {
+            window.isWeb3Fired = true;
             web3.eth.sendTransaction({
               to: to_address,
               from: web3.eth.coinbase,
@@ -807,7 +807,6 @@ $('#submitBounty').validate({
       ipfsBounty.payload.issuer.address = account;
       ipfsBounty.payload.fee_tx_id = txnId;
       ipfsBounty.payload.fee_amount = fee;
-      console.log(ipfsBounty, 'bounty');
       ipfs.addJson(ipfsBounty, newIpfsCallback);
       if (typeof ga != 'undefined') {
         if (fee == 0)

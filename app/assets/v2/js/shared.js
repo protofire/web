@@ -671,7 +671,6 @@ const randomElement = array => {
 
   return array[randomIndex];
 };
-
 /* eslint-disable no-lonely-if */
 var currentNetwork = function(network) {
 
@@ -907,49 +906,43 @@ var listen_for_web3_changes = async function() {
     } else {
       document.listen_for_web3_iterations += 1;
     }
-    if (window.getProvider) {
-      currentNetwork('not-provider');
-      is_metamask_unlocked = true;
-      trigger_form_hooks();
-      return;
-    }
-    if (typeof web3 == 'undefined') {
-      currentNetwork();
-      trigger_form_hooks();
-    } else if (typeof web3 == 'undefined' || typeof web3.eth == 'undefined' || typeof web3.eth.coinbase == 'undefined') {
-      currentNetwork('locked');
-      trigger_form_hooks();
-    } else if (!web3.eth.coinbase) {
-      currentNetwork('not-provider');
-      is_metamask_unlocked = true;
-      trigger_form_hooks();
-    } else if (localStorage.getItem('setProvider')) {
-      // window.setProvider = false;
-      localStorage.setItem('setProvider', false);
-      web3.eth.getBalance(web3.eth.coinbase, function(errors, result) {
-        if (errors) {
-          return;
-        }
-        if (typeof result != 'undefined' && result !== null) {
-          document.balance = result.toNumber();
-          if (document.balance == 0) {
-            $('#zero_balance_error').css('display', 'block');
-            $('#admin_faucet_form').remove();
+    if (!window.isWeb3Fired) {
+      if (typeof web3 == 'undefined') {
+        currentNetwork();
+        trigger_form_hooks();
+      } else if (typeof web3 == 'undefined' || typeof web3.eth == 'undefined' || typeof web3.eth.coinbase == 'undefined') {
+        currentNetwork('locked');
+        trigger_form_hooks();
+      } else if (!web3.eth.coinbase) {
+        currentNetwork('not-provider');
+        is_metamask_unlocked = true;
+        trigger_form_hooks();
+      } else {
+        web3.eth.getBalance(web3.eth.coinbase, function(errors, result) {
+          if (errors) {
+            return;
           }
-        }
-      });
+          if (typeof result != 'undefined' && result !== null) {
+            document.balance = result.toNumber();
+            if (document.balance == 0) {
+              $('#zero_balance_error').css('display', 'block');
+              $('#admin_faucet_form').remove();
+            }
+          }
+        });
 
-      web3.version.getNetwork(function(error, netId) {
-        if (error) {
-          currentNetwork();
-        } else {
-          var network = getNetwork(netId);
+        web3.version.getNetwork(function(error, netId) {
+          if (error) {
+            currentNetwork();
+          } else {
+            var network = getNetwork(netId);
 
-          currentNetwork(network);
-          trigger_form_hooks();
-        }
-      });
-      clearInterval(window.web3_changes_id);
+            currentNetwork(network);
+            trigger_form_hooks();
+          }
+        });
+      }
+
     }
   }
 };
@@ -983,7 +976,7 @@ var actions_page_warn_if_not_on_same_network = function() {
 attach_change_element_type();
 
 window.addEventListener('load', function() {
-  window.web3_changes_id = setInterval(listen_for_web3_changes, 1000);
+  setInterval(listen_for_web3_changes, 1000);
 });
 
 var setUsdAmount = function(event) {

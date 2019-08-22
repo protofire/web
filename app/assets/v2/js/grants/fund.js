@@ -98,6 +98,7 @@ $(document).ready(function() {
       }
     },
     submitHandler: function(form) {
+      console.log('mamita decime');
       var data = {};
 
       $.each($(form).serializeArray(), function() {
