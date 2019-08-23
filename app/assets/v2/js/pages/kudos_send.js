@@ -162,7 +162,6 @@ var renderWallets = function(profileId) {
 // Step 0
 // DOM is ready
 $(document).ready(function() {
-
   // upon keypress for the select2, gotta make sure it opens
   setTimeout(function() {
     $('.select2').keypress(function() {

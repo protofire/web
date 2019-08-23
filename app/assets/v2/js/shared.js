@@ -746,7 +746,7 @@ var currentNetwork = function(network) {
           $('#navbar-network-banner').html(info);
         }
       } else {
-        info = gettext('Connect to Rinkeby / Custom RPC via Metamask');
+        info = gettext('Connect to Rinkeby / Custom RPC via Metamask/Fortmatic');
         $('#current-network').text(gettext('Unsupported Network'));
         $('#navbar-network-banner').html(info);
       }

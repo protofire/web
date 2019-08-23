@@ -76,18 +76,40 @@ function ask_metamask_connection() {
     page_url = page_url.substring(0, len);
   }
   if ($.inArray(page_url, shown_on) != -1 && !is_metamask_approved) {
-    _alert('Metamask not connected. <button id="metamask_connect" onclick="approve_metamask()">Click here to connect to metamask</button>', 'error');
-    $('#metamask_connect').css('background', 'none');
-    $('#metamask_connect').css('color', 'white');
-    $('#metamask_connect').css('border', '2px solid white');
-    $('#metamask_connect').css('border-radius', '10px');
+    _alert('Provider not connected. <button class="metamask_connect" onclick="exec(approve_metamask,true)">Click here to connect to metamask</button> or <button id="fortmatic-provider" class="metamask_connect" onclick="exec(approve_fortmatic)">Click here to connect to Fortmatic</button>', 'error');
+    $('.metamask_connect').css('background', 'none');
+    $('.metamask_connect').css('color', 'white');
+    $('.metamask_connect').css('border', '2px solid white');
+    $('.metamask_connect').css('border-radius', '10px');
   }
+}
+
+async function exec(fn, isMetamask = false) {
+  if (!isMetamask) {
+    $('#fortmatic-provider').text('Loading');
+    $('#fortmatic-provider').addClass('btn-fortmatic--loading');
+  }
+  await fn();
+  window.location.reload();
 }
 
 async function ask_fortmatic_connection() {
   var fm = new Fortmatic('pk_test_53020F639050318F');
 
-  window.web3 = new Web3(fm.getProvider());
-  await web3.currentProvider.enable();
-  is_metamask_approved = true;
+  const web3 = new Web3(fm.getProvider());
+
+  try {
+    await web3.currentProvider.enable();
+    window.web3 = web3;
+    is_metamask_approved = true;
+    WatchJS.watch(window.web3.currentProvider, 'isLoggedIn', function(prop, action, newvalue, oldvalue) {
+      if (!newvalue) {
+        localStorage.removeItem('fortmatic');
+        window.location.reload();
+      }
+    });
+
+  } catch (e) {
+    console.log(e);
+  }
 }
