@@ -314,7 +314,7 @@ function sendTip(email, github_url, from_name, username, amount, comments_public
               to: destinationAccount,
               value: gas_money,
               gasPrice: web3.toHex(get_gas_price())
-            }, post_send_callback);
+            }, send_erc20);
           };
 
           if (is_direct_to_recipient) {
