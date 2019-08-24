@@ -573,7 +573,6 @@ and start with the prefix "0x". nonce is required.
 @method (signTransaction)
 **/
 Accounts.prototype.signTransaction = function(tx_params, callback) {
-  console.log('fuaaaa')
     // Accounts instance
     var accounts = this;
 
